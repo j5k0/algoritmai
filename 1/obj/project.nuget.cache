@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "rn5y18+1Gfc=",
+  "success": true,
+  "projectFilePath": "/home/legion/BMP_Example/BMP_Example.csproj",
+  "expectedPackageFiles": [
+    "/home/legion/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.0/microsoft.aspnetcore.app.ref.10.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
