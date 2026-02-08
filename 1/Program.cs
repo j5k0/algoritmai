@@ -16,7 +16,7 @@ namespace BMP_example
 
         public static void ColorCenter(ref byte[] array, int l, int imageSize){
             int bottomLimit = imageSize/3;
-            int upperLimit = imageSize*2;
+            int upperLimit = imageSize/3*2;
             for(int x=bottomLimit; x<upperLimit; x++){
                 for(int y=bottomLimit; y<upperLimit; y++){
                     ColorPixel(x, y, l, 1, ref array);
@@ -43,6 +43,24 @@ namespace BMP_example
                     previousPushed = pushedOut;
                 }
             }
+        }
+
+        public static byte[] ArrangePixelArray(int currentDepth, int maxDepth, byte[] previousArray, int previousL, int currentGridSize){
+            if(currentDepth < maxDepth){
+                int l = (currentGridSize + 31) / 32 * 4;
+                var t = new byte[currentGridSize * l];
+
+                ColorCenter(ref t, l, currentGridSize);
+                CopyToLocation(3, 0, ref t, l, previousArray, previousL, currentGridSize/6);
+                CopyToLocation(5, 1, ref t, l, previousArray, previousL, currentGridSize/6);
+                CopyToLocation(4, 2, ref t, l, previousArray, previousL, currentGridSize/6);
+                CopyToLocation(0, 3, ref t, l, previousArray, previousL, currentGridSize/6);
+                CopyToLocation(4, 5, ref t, l, previousArray, previousL, currentGridSize/6);
+                
+                return ArrangePixelArray(currentDepth + 1, maxDepth, t, l, currentGridSize*6);
+            }
+
+            return previousArray;
         }
 
         static void Main(string[] args)
@@ -79,9 +97,7 @@ namespace BMP_example
 
             using (FileStream file = new FileStream("sample2.bmp", FileMode.Create, FileAccess.Write))
             {
-                file.Write(header);
-
-                int resolution = 23328;
+                int resolution = 3*6*6*6*6*6*6;
                 byte[] resBytes = BitConverter.GetBytes(resolution);
 
                 header[18] = resBytes[0];
@@ -93,6 +109,7 @@ namespace BMP_example
                 header[24] = resBytes[2];
                 header[25] = resBytes[3];
 
+                file.Write(header);
 
                 var watch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -105,74 +122,8 @@ namespace BMP_example
                 currentGridSize *= 6;
                 lastL = l;
 
-                l = (currentGridSize + 31) / 32 * 4;
-                t = new byte[currentGridSize * l];
-                ColorCenter(ref t, l, currentGridSize);
-                CopyToLocation(3, 0, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(5, 1, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(4, 2, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(0, 3, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(4, 5, ref t, l, copyArray, lastL, lastGridSize);
+                t = ArrangePixelArray(1, 7, t, l, currentGridSize);
 
-                copyArray = t;
-                lastGridSize = currentGridSize;
-                currentGridSize *= 6;
-                lastL = l;
-
-                l = (currentGridSize + 31) / 32 * 4;
-                t = new byte[currentGridSize*l];
-                ColorCenter(ref t, l, currentGridSize);
-                CopyToLocation(3, 0, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(5, 1, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(4, 2, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(0, 3, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(4, 5, ref t, l, copyArray, lastL, lastGridSize);
-
-                copyArray = t;
-                lastGridSize = currentGridSize;
-                currentGridSize *= 6;
-                lastL = l;
-
-                l = (currentGridSize + 31) / 32 * 4;
-                t = new byte[currentGridSize*l];
-                ColorCenter(ref t, l, currentGridSize);
-                CopyToLocation(3, 0, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(5, 1, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(4, 2, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(0, 3, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(4, 5, ref t, l, copyArray, lastL, lastGridSize);
-                
-                copyArray = t;
-                lastGridSize = currentGridSize;
-                currentGridSize *= 6;
-                lastL = l;
-
-                l = (currentGridSize + 31) / 32 * 4;
-                t = new byte[currentGridSize*l];
-                ColorCenter(ref t, l, currentGridSize);
-                CopyToLocation(3, 0, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(5, 1, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(4, 2, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(0, 3, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(4, 5, ref t, l, copyArray, lastL, lastGridSize);
-
-                copyArray = t;
-                lastGridSize = currentGridSize;
-                currentGridSize *= 6;
-                lastL = l;
-
-                l = (currentGridSize + 31) / 32 * 4;
-                t = new byte[currentGridSize*l];
-                ColorCenter(ref t, l, currentGridSize);
-                CopyToLocation(3, 0, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(5, 1, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(4, 2, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(0, 3, ref t, l, copyArray, lastL, lastGridSize);
-                CopyToLocation(4, 5, ref t, l, copyArray, lastL, lastGridSize);
-
-                watch.Stop();
-                var elapsedMs = watch.ElapsedMilliseconds;
-                Console.WriteLine(elapsedMs);
                 file.Write(t);
                 file.Close();
             }
