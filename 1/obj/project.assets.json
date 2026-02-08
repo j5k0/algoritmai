@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/legion/BMP_Example/BMP_Example.csproj",
+      "projectUniqueName": "/home/legion/Algorai/1/BMP_Example.csproj",
       "projectName": "BMP_Example",
-      "projectPath": "/home/legion/BMP_Example/BMP_Example.csproj",
+      "projectPath": "/home/legion/Algorai/1/BMP_Example.csproj",
       "packagesPath": "/home/legion/.nuget/packages/",
-      "outputPath": "/home/legion/BMP_Example/obj/",
+      "outputPath": "/home/legion/Algorai/1/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/legion/.nuget/NuGet/NuGet.Config"
