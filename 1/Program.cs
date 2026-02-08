@@ -15,8 +15,10 @@ namespace BMP_example
         }
 
         public static void ColorCenter(ref byte[] array, int l, int imageSize){
-            for(int x=imageSize/3; x<imageSize/3*2; x++){
-                for(int y=imageSize/3; y<imageSize/3*2; y++){
+            int bottomLimit = imageSize/3;
+            int upperLimit = imageSize*2;
+            for(int x=bottomLimit; x<upperLimit; x++){
+                for(int y=bottomLimit; y<upperLimit; y++){
                     ColorPixel(x, y, l, 1, ref array);
                 }
             }
@@ -54,8 +56,8 @@ namespace BMP_example
                     0x3e, 0x0, 0x0, 0x0,
                     //Antraštės informacija
                     0x28, 0x0, 0x0, 0x0,
-                    0x20, 0x5B, 0x0, 0x0,
-                    0x20, 0x5B, 0x0, 0x0,
+                    0x0, 0x0, 0x0, 0x0, // image width
+                    0x0, 0x0, 0x0, 0x0, // image height
                     0x1, 0x0,
                     0x1, 0x0,
                     0x0, 0x0, 0x0, 0x0,
@@ -78,6 +80,19 @@ namespace BMP_example
             using (FileStream file = new FileStream("sample2.bmp", FileMode.Create, FileAccess.Write))
             {
                 file.Write(header);
+
+                int resolution = 23328;
+                byte[] resBytes = BitConverter.GetBytes(resolution);
+
+                header[18] = resBytes[0];
+                header[19] = resBytes[1];
+                header[20] = resBytes[2];
+                header[21] = resBytes[3];
+                header[22] = resBytes[0];
+                header[23] = resBytes[1];
+                header[24] = resBytes[2];
+                header[25] = resBytes[3];
+
 
                 var watch = System.Diagnostics.Stopwatch.StartNew();
 
