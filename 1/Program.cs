@@ -23,6 +23,14 @@ namespace BMP_example
             }
         }
 
+        public static void DrawLine(int x0, int y0, int x1, int y1, ref byte[] array, int l){
+            for(int y = y0; y < y1; y++){
+                for(int x = x0; x < x1; x++){
+                    ColorPixel(x, y, l, 1, ref array);
+                }
+            }
+        }
+
         static void Main(string[] args)
         {
             var header = new byte[62]
@@ -52,6 +60,8 @@ namespace BMP_example
             using (FileStream file = new FileStream("sample2.bmp", FileMode.Create, FileAccess.Write))
             {
                 int resolution = 1000;
+                int squareSize = resolution/3;
+
                 byte[] resBytes = BitConverter.GetBytes(resolution);
 
                 header[18] = resBytes[0];
@@ -66,7 +76,7 @@ namespace BMP_example
 
                 int l = (resolution + 31) / 32 * 4;
                 byte[] array = new byte[resolution * l];
-                DrawRectangle(250, 250, 750, 750, ref array, l);
+                DrawRectangle(squareSize, squareSize, squareSize*2, squareSize*2, ref array, l);
 
                 file.Write(header);
                 file.Write(array);
