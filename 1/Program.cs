@@ -14,55 +14,6 @@ namespace BMP_example
             array[byteIndex] |= (byte)(color << bitPosition);
         }
 
-        public static void ColorCenter(ref byte[] array, int l, int imageSize){
-            int bottomLimit = imageSize/3;
-            int upperLimit = imageSize/3*2;
-            for(int x=bottomLimit; x<upperLimit; x++){
-                for(int y=bottomLimit; y<upperLimit; y++){
-                    ColorPixel(x, y, l, 1, ref array);
-                }
-            }
-        }
-
-        public static void CopyToLocation(int x, int y, ref byte[] array, int l, byte[] copyArray, int copyL, int previousImageSize){
-            int startIndex = x*previousImageSize/8 + y*l*previousImageSize;
-            int startOffset = (x*previousImageSize)%8;
-            for(int i=0; i<previousImageSize; i++){
-                byte pushedOut;
-                byte previousPushed = (byte)0;
-                for(int j=i*copyL; j<i*copyL + copyL; j++){
-                    pushedOut = (byte) (copyArray[j] << (8 - startOffset));
-
-                    int index = startIndex + (j-i*copyL) + i*l;
-                    int limit = (y*previousImageSize + i)*l + l;
-
-                    if(index < limit){
-                        array[index] |= (byte)(copyArray[j] >> startOffset);
-                        array[index] |= previousPushed;
-                    }
-                    previousPushed = pushedOut;
-                }
-            }
-        }
-
-        public static byte[] ArrangePixelArray(int currentDepth, int maxDepth, byte[] previousArray, int previousL, int currentGridSize){
-            if(currentDepth < maxDepth){
-                int l = (currentGridSize + 31) / 32 * 4;
-                var t = new byte[currentGridSize * l];
-
-                ColorCenter(ref t, l, currentGridSize);
-                CopyToLocation(3, 0, ref t, l, previousArray, previousL, currentGridSize/6);
-                CopyToLocation(5, 1, ref t, l, previousArray, previousL, currentGridSize/6);
-                CopyToLocation(4, 2, ref t, l, previousArray, previousL, currentGridSize/6);
-                CopyToLocation(0, 3, ref t, l, previousArray, previousL, currentGridSize/6);
-                CopyToLocation(4, 5, ref t, l, previousArray, previousL, currentGridSize/6);
-                
-                return ArrangePixelArray(currentDepth + 1, maxDepth, t, l, currentGridSize*6);
-            }
-
-            return previousArray;
-        }
-
         static void Main(string[] args)
         {
             var header = new byte[62]
@@ -89,12 +40,6 @@ namespace BMP_example
                     0x0, 0x0, 0x0, 0x0
                 };
 
-            
-            byte[] copyArray;
-            int lastGridSize;
-            int lastL;
-            int currentGridSize = 3;
-
             using (FileStream file = new FileStream("sample2.bmp", FileMode.Create, FileAccess.Write))
             {
                 int resolution = 3*6*6*6*6*6*6;
@@ -113,18 +58,6 @@ namespace BMP_example
 
                 var watch = System.Diagnostics.Stopwatch.StartNew();
 
-                int l = (currentGridSize + 31) / 32 * 4;
-                var t = new byte[currentGridSize * l];
-                ColorPixel(1, 1, l, 1, ref t);
-
-                copyArray = t;
-                lastGridSize = currentGridSize;
-                currentGridSize *= 6;
-                lastL = l;
-
-                t = ArrangePixelArray(1, 7, t, l, currentGridSize);
-
-                file.Write(t);
                 file.Close();
             }
         }
