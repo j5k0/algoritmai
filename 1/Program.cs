@@ -26,7 +26,7 @@ namespace BMP_example
         public static void DrawLine(int x0, int y0, int x1, int y1, ref byte[] array, int l){
             for(int y = y0; y <= y1; y++){
                 for(int x = x0; x <= x1; x++){
-                    if(y < 1000 & x < 1000){
+                    if(y < 20000 & x < 20000){
                         ColorPixel(x, y, l, 1, ref array);
                     }
                 }
@@ -61,8 +61,11 @@ namespace BMP_example
 
             using (FileStream file = new FileStream("sample2.bmp", FileMode.Create, FileAccess.Write))
             {
-                int resolution = 1000;
+                int resolution = 20000;
                 int squareSize = resolution/3;
+                int smallerSquareSize = squareSize/6;
+
+                int cubeSize = resolution/6;
 
                 byte[] resBytes = BitConverter.GetBytes(resolution);
 
@@ -80,10 +83,28 @@ namespace BMP_example
                 byte[] array = new byte[resolution * l];
 
                 DrawRectangle(squareSize, squareSize, squareSize*2, squareSize*2, ref array, l);
+
+                // Y axis
                 DrawLine(0, squareSize, resolution, squareSize, ref array, l);
                 DrawLine(0, squareSize*2, resolution, squareSize*2, ref array, l);
+                DrawLine(0, (int)(squareSize*1.5), resolution, (int)(squareSize*1.5), ref array, l);
+                DrawLine(0, (int)(squareSize*0.5), resolution, (int)(squareSize*0.5), ref array, l);
+                DrawLine(0, (int)(squareSize*2.5), resolution, (int)(squareSize*2.5), ref array, l);
+
+                // X axis
                 DrawLine(squareSize, 0, squareSize, resolution, ref array, l);
                 DrawLine(squareSize*2, 0, squareSize*2, resolution, ref array, l);
+                DrawLine((int)(squareSize*1.5), 0, (int)(squareSize*1.5), resolution, ref array, l);
+                DrawLine((int)(squareSize*0.5), 0, (int)(squareSize*0.5), resolution, ref array, l);
+                DrawLine((int)(squareSize*2.5), 0, (int)(squareSize*2.5), resolution, ref array, l);
+
+                DrawRectangle(cubeSize*3 + smallerSquareSize, smallerSquareSize, cubeSize*3 + 2*smallerSquareSize, 2*smallerSquareSize, ref array, l);
+
+                DrawLine(cubeSize*3, cubeSize/3, cubeSize*(3+1), cubeSize/3, ref array, l);
+                DrawLine(cubeSize*3, cubeSize/3*2, cubeSize*(3+1), cubeSize/3*2, ref array, l);
+
+                DrawLine(cubeSize*3 + cubeSize/3, cubeSize*0, cubeSize*3 + cubeSize/3, cubeSize*(0+1), ref array, l);
+                DrawLine(cubeSize*3 + cubeSize/3*2, cubeSize*0, cubeSize*3 + cubeSize/3*2, cubeSize*(0+1), ref array, l);
 
                 file.Write(header);
                 file.Write(array);
