@@ -24,9 +24,11 @@ namespace BMP_example
         }
 
         public static void DrawLine(int x0, int y0, int x1, int y1, ref byte[] array, int l){
-            for(int y = y0; y < y1; y++){
-                for(int x = x0; x < x1; x++){
-                    ColorPixel(x, y, l, 1, ref array);
+            for(int y = y0; y <= y1; y++){
+                for(int x = x0; x <= x1; x++){
+                    if(y < 1000 & x < 1000){
+                        ColorPixel(x, y, l, 1, ref array);
+                    }
                 }
             }
         }
@@ -76,7 +78,12 @@ namespace BMP_example
 
                 int l = (resolution + 31) / 32 * 4;
                 byte[] array = new byte[resolution * l];
+
                 DrawRectangle(squareSize, squareSize, squareSize*2, squareSize*2, ref array, l);
+                DrawLine(0, squareSize, resolution, squareSize, ref array, l);
+                DrawLine(0, squareSize*2, resolution, squareSize*2, ref array, l);
+                DrawLine(squareSize, 0, squareSize, resolution, ref array, l);
+                DrawLine(squareSize*2, 0, squareSize*2, resolution, ref array, l);
 
                 file.Write(header);
                 file.Write(array);
