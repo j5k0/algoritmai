@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace BMP_example
 {
+    // TODO: important note - change int everywhere to double and only round when drawing in order to minimise issues
     class Program
     {
         public static void ColorPixel(int x, int y, int l, int color, ref byte[] array)
@@ -12,6 +13,14 @@ namespace BMP_example
             int byteIndex = x/8 + y*l;
             int bitPosition = 7 - (x%8);
             array[byteIndex] |= (byte)(color << bitPosition);
+        }
+
+        public static void DrawRectangle(int x0, int y0, int w, int h, ref byte[] array, int l){
+            for(int y = y0; y < h; y++){
+                for(int x = x0; x < w; x++){
+                    ColorPixel(x, y, l, 1, ref array);
+                }
+            }
         }
 
         static void Main(string[] args)
@@ -42,7 +51,7 @@ namespace BMP_example
 
             using (FileStream file = new FileStream("sample2.bmp", FileMode.Create, FileAccess.Write))
             {
-                int resolution = 3*6*6*6*6*6*6;
+                int resolution = 1000;
                 byte[] resBytes = BitConverter.GetBytes(resolution);
 
                 header[18] = resBytes[0];
@@ -54,7 +63,13 @@ namespace BMP_example
                 header[24] = resBytes[2];
                 header[25] = resBytes[3];
 
+
+                int l = (resolution + 31) / 32 * 4;
+                byte[] array = new byte[resolution * l];
+                DrawRectangle(250, 250, 750, 750, ref array, l);
+
                 file.Write(header);
+                file.Write(array);
 
                 var watch = System.Diagnostics.Stopwatch.StartNew();
 
