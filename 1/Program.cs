@@ -8,29 +8,70 @@ namespace BMP_example
     // TODO: important note - change int everywhere to double and only round when drawing in order to minimise issues
     class Program
     {
+        static int resolution = 20000;
+        static int centerPoint = resolution/2;
+
         public static void ColorPixel(int x, int y, int l, int color, ref byte[] array)
         {
-            int byteIndex = x/8 + y*l;
-            int bitPosition = 7 - (x%8);
-            array[byteIndex] |= (byte)(color << bitPosition);
+            if(x+y != resolution*2){
+                int byteIndex = x/8 + y*l;
+                int bitPosition = 7 - (x%8);
+                array[byteIndex] |= (byte)(color << bitPosition);
+            }
         }
 
-        public static void DrawRectangle(int x0, int y0, int w, int h, ref byte[] array, int l){
-            for(int y = y0; y < h; y++){
-                for(int x = x0; x < w; x++){
+        public static void DrawRectangle(double x0, double y0, double w, double h, ref byte[] array, int l){
+            int rx0 = (int)Math.Round(x0);
+            int ry0 = (int)Math.Round(y0);
+            int rw = (int)Math.Round(w);
+            int rh = (int)Math.Round(h);
+            for(int y = ry0; y < rh; y++){
+                for(int x = rx0; x < rw; x++){
                     ColorPixel(x, y, l, 1, ref array);
                 }
             }
         }
 
-        public static void DrawLine(int x0, int y0, int x1, int y1, ref byte[] array, int l){
-            for(int y = y0; y <= y1; y++){
-                for(int x = x0; x <= x1; x++){
-                    if(y < 20000 & x < 20000){
+        public static void DrawLine(double x0, double y0, double x1, double y1, ref byte[] array, int l){
+            int rx0 = (int)Math.Round(x0);
+            int ry0 = (int)Math.Round(y0);
+            int rx1 = (int)Math.Round(x1);
+            int ry1 = (int)Math.Round(y1);
+
+            for(int y = ry0; y <= ry1; y++){
+                for(int x = rx0; x <= rx1; x++){
+                    if(x >= 0 && y >= 0 && y < resolution && x < resolution){
                         ColorPixel(x, y, l, 1, ref array);
                     }
                 }
             }
+        }
+
+        public static void DrawRecursiveDepth(int currentDepth, int maxDepth, double x, double y, ref byte[] array, int l){
+            if(currentDepth >= maxDepth)
+                return;
+
+            int mult = (int)Math.Pow(6, currentDepth);
+            double currentGridSize = resolution/mult;
+            //double previousGridSize = currentGridSize*6;
+            double squareSize = currentGridSize/3;
+            //double previousSquareSize = squareSize*6;
+            double halfSquareSize = squareSize/2;
+            //double previousHalfSquareSize = halfSquareSize*6;
+
+            for(int i=0; i<=currentGridSize/squareSize; i++){
+
+                DrawLine((x - halfSquareSize*3 + squareSize*i), (y - halfSquareSize*3), (x - halfSquareSize*3 + squareSize*i), (y + halfSquareSize*3), ref array, l);
+                DrawLine((x - halfSquareSize*3), (y - halfSquareSize*3 + squareSize*i), (x + halfSquareSize*3), (y - halfSquareSize*3 + squareSize*i), ref array, l);
+            }
+
+            DrawRectangle((x - halfSquareSize), (y - halfSquareSize), (x + halfSquareSize), (y + halfSquareSize), ref array, l);
+
+            DrawRecursiveDepth(currentDepth + 1, maxDepth, (x+halfSquareSize/2*1), (y+halfSquareSize/2*-5), ref array, l);
+            //DrawRecursiveDepth(currentDepth + 1, maxDepth, (halfSquareSize*5 + resolution/(mult*12)), (halfSquareSize*1 + resolution/(mult*12)), ref array, l);
+            //DrawRecursiveDepth(currentDepth + 1, maxDepth, (halfSquareSize*4 + resolution/(mult*12)), (halfSquareSize*2 + resolution/(mult*12)), ref array, l);
+            //DrawRecursiveDepth(currentDepth + 1, maxDepth, (halfSquareSize*0 + resolution/(mult*12)), (halfSquareSize*3 + resolution/(mult*12)), ref array, l);
+            //DrawRecursiveDepth(currentDepth + 1, maxDepth, (halfSquareSize*4 + resolution/(mult*12)), (halfSquareSize*5 + resolution/(mult*12)), ref array, l);
         }
 
         static void Main(string[] args)
@@ -61,11 +102,10 @@ namespace BMP_example
 
             using (FileStream file = new FileStream("sample2.bmp", FileMode.Create, FileAccess.Write))
             {
-                int resolution = 20000;
-                int squareSize = resolution/3;
-                int smallerSquareSize = squareSize/6;
+                //int squareSize = resolution/3;
+                //int smallerSquareSize = squareSize/6;
 
-                int cubeSize = resolution/6;
+                //int cubeSize = resolution/6;
 
                 byte[] resBytes = BitConverter.GetBytes(resolution);
 
@@ -82,7 +122,9 @@ namespace BMP_example
                 int l = (resolution + 31) / 32 * 4;
                 byte[] array = new byte[resolution * l];
 
-                DrawRectangle(squareSize, squareSize, squareSize*2, squareSize*2, ref array, l);
+                DrawRecursiveDepth(0, 6, centerPoint, centerPoint, ref array, l);
+
+                /*DrawRectangle(squareSize, squareSize, squareSize*2, squareSize*2, ref array, l);
 
                 // Y axis
                 DrawLine(0, squareSize, resolution, squareSize, ref array, l);
@@ -104,7 +146,7 @@ namespace BMP_example
                 DrawLine(cubeSize*3, cubeSize/3*2, cubeSize*(3+1), cubeSize/3*2, ref array, l);
 
                 DrawLine(cubeSize*3 + cubeSize/3, cubeSize*0, cubeSize*3 + cubeSize/3, cubeSize*(0+1), ref array, l);
-                DrawLine(cubeSize*3 + cubeSize/3*2, cubeSize*0, cubeSize*3 + cubeSize/3*2, cubeSize*(0+1), ref array, l);
+                DrawLine(cubeSize*3 + cubeSize/3*2, cubeSize*0, cubeSize*3 + cubeSize/3*2, cubeSize*(0+1), ref array, l);*/
 
                 file.Write(header);
                 file.Write(array);
