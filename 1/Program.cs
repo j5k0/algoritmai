@@ -43,9 +43,11 @@ namespace BMP_example
                 b2 = (int)Math.Round(maxY - a*maxX);
             }
 
-            for(int i=0; i<3; i++){
-                DrawAngledLine(bottomLeftAngle, b2 + (b1-b2)/2*i, sideLength*3, l, ref array);
-                DrawAngledLine(0, minY + (maxY-minY)/2*i, sideLength*3, l, ref array);
+            for(int i=0; i<2; i++){
+                DrawAngledLine(bottomLeftAngle, centerX - halfLength + sideLength*i, centerY, sideLength*1.5, l, ref array);
+                DrawAngledLine(0, centerX - offsetX + offsetX*2*i, minY + (maxY-minY)*i, sideLength*1.5, l, ref array);
+                //DrawAngledLine(bottomLeftAngle, b2 + (b1-b2)/2*i, sideLength*3, l, ref array);
+                //DrawAngledLine(0, minY + (maxY-minY)/2*i, sideLength*3, l, ref array);
             }
 
             double k;
@@ -63,58 +65,15 @@ namespace BMP_example
             }
         }
 
-        public static void DrawAngledLine(double angle, double offset, double limit, int l, ref byte[] array){
+        public static void DrawAngledLine(double angle, double cx, double cy, double halfLength, int l, ref byte[] array){
             double rad = angle * Math.PI / 180.0;
-            double a = Math.Tan(rad);
-            int b = (int)Math.Round(offset);
-            int x, y;
-
-            int ost = (int)Math.Round(offset);
-            int lim = (int)Math.Round(limit/2);
-
-            for(int i=0; i<resolution; i++){
-                if(Math.Abs(a) <= 1)
-                {
-                    x = i;
-                    y = (int)Math.Round(a*x + b);
-                }
-                else{
-                    if(a < resolution){
-                        y = i;
-                        x = (int)Math.Round((y-b)/a);
-                    }
-                    else{
-                        x = b;
-                        y = i;
-                    }
-                }
+            double dx = Math.Cos(rad);
+            double dy = Math.Sin(rad);
+            int lim = (int)Math.Round(halfLength);
+            for(int i=-lim; i<lim; i++){
+                int x = (int)Math.Round(cx + i*dx);
+                int y = (int)Math.Round(cy + i*dy);
                 ColorPixel(x, y, l, 1, ref array);
-            }
-        }
-
-        public static void DrawRectangle(double x0, double y0, double w, double h, ref byte[] array, int l){
-            int rx0 = (int)Math.Round(x0);
-            int ry0 = (int)Math.Round(y0);
-            int rw = (int)Math.Round(w);
-            int rh = (int)Math.Round(h);
-            for(int y = ry0; y < rh; y++){
-                for(int x = rx0; x < rw; x++){
-                    ColorPixel(x, y, l, 1, ref array);
-                }
-            }
-        }
-
-        public static void DrawLine(double x0, double y0, double x1, double y1, ref byte[] array, int l){
-            int rx0 = (int)Math.Round(x0);
-            int ry0 = (int)Math.Round(y0);
-            int rx1 = (int)Math.Round(x1);
-            int ry1 = (int)Math.Round(y1);
-
-            for(int y = ry0; y <= ry1; y++){
-                for(int x = rx0; x <= rx1; x++){
-                    if(x >= 0 && y >= 0 && y < resolution && x < resolution)
-                        ColorPixel(x, y, l, 1, ref array);
-                }
             }
         }
 
@@ -129,32 +88,22 @@ namespace BMP_example
             double squareSize = currentGridSize/3;
             double halfSquareSize = squareSize/2;
 
-            // inner grid line drawing loop
-            // only fill with inner lines inside the grid, the outside lines will be drawn by the outer line drawing loop
-            for(int i=1; i<3; i++){
-                //DrawLine((x - halfSquareSize*3 + squareSize*i), (y - halfSquareSize*3), (x - halfSquareSize*3 + squareSize*i), (y + halfSquareSize*3), ref array, l);
-                //DrawLine((x - halfSquareSize*3), (y - halfSquareSize*3 + squareSize*i), (x + halfSquareSize*3), (y - halfSquareSize*3 + squareSize*i), ref array, l);
-            }
+            DrawParallelogram(x, y, squareSize, 89.999, ref array, l);
 
-            // outer line drawing loop
-            // for filling the previous square with additional vertical and horizontal lines
-            for(int i=1; i<6; i++){
-                //DrawLine((prevX - previousHalfSquare*3 + currentGridSize*i), (prevY - previousHalfSquare*3), (prevX - previousHalfSquare*3 + currentGridSize*i), (prevY + previousHalfSquare*3), ref array, l);
-                //DrawLine((prevX - previousHalfSquare*3), (prevY - previousHalfSquare*3 + currentGridSize*i), (prevX + previousHalfSquare*3), (prevY - previousHalfSquare*3 + currentGridSize*i), ref array, l);
-            }
-
-            //DrawRectangle((x - halfSquareSize), (y - halfSquareSize), (x + halfSquareSize), (y + halfSquareSize), ref array, l);
-            DrawParallelogram(x, y, squareSize, 89.99, ref array, l);
-
-            double rad = 89.99 * Math.PI / 180;
-            double offsetX = (squareSize * Math.Cos(rad));
+            double rad = 89.999 * Math.PI / 180;
+            double offsetX = (squareSize * Math.Cos(rad))/2;
             double offsetY = (squareSize - squareSize * Math.Sin(rad))/2;
 
-            DrawRecursiveDepth(currentDepth + 1, maxDepth, (x+halfSquareSize/2*1) - offsetX/3, (y+halfSquareSize/2*-5) + offsetY/3, x, y, ref array, l);
-            DrawRecursiveDepth(currentDepth + 1, maxDepth, (x+halfSquareSize/2*5) - offsetX/3, (y+halfSquareSize/2*-3) + offsetY/3, x, y, ref array, l);
-            DrawRecursiveDepth(currentDepth + 1, maxDepth, (x+halfSquareSize/2*3) - offsetX/3, (y+halfSquareSize/2*-1) + offsetY/3, x, y, ref array, l);
-            DrawRecursiveDepth(currentDepth + 1, maxDepth, (x+halfSquareSize/2*-5)+ offsetX/3, (y+halfSquareSize/2*1)  - offsetY/3, x, y, ref array, l);
-            DrawRecursiveDepth(currentDepth + 1, maxDepth, (x+halfSquareSize/2*3) + offsetX/3, (y+halfSquareSize/2*5)  - offsetY/3, x, y, ref array, l);
+            double my = Math.Sin(rad);
+            double mx = Math.Cos(rad);
+
+            // this shit somehow fucking relates offsetX*2.5 ----> halfSquareSize*-2.5 and so on and so on
+
+            DrawRecursiveDepth(currentDepth + 1, maxDepth, x+halfSquareSize*0.5 - offsetX*2.5, y+halfSquareSize*-2.5*my, x, y, ref array, l);
+            DrawRecursiveDepth(currentDepth + 1, maxDepth, (x+halfSquareSize*2.5 - offsetX*1.5), y+halfSquareSize*-1.5*my, x, y, ref array, l);
+            DrawRecursiveDepth(currentDepth + 1, maxDepth, (x+halfSquareSize*1.5 - offsetX*0.5), y+halfSquareSize*-0.5*my, x, y, ref array, l);
+            DrawRecursiveDepth(currentDepth + 1, maxDepth, (x+halfSquareSize/2*-5)+ offsetX*0.5, y+halfSquareSize*0.5*my, x, y, ref array, l);
+            DrawRecursiveDepth(currentDepth + 1, maxDepth, (x+halfSquareSize/2*3) + offsetX*2.5, y+halfSquareSize*2.5*my, x, y, ref array, l);
         }
 
         static void Main(string[] args)
@@ -200,7 +149,7 @@ namespace BMP_example
                 int l = (resolution + 31) / 32 * 4;
                 byte[] array = new byte[resolution * l];
 
-                DrawRecursiveDepth(0, 1, centerPoint, centerPoint, centerPoint, centerPoint, ref array, l);
+                DrawRecursiveDepth(0, 3, centerPoint, centerPoint, centerPoint, centerPoint, ref array, l);
                 //DrawParallelogram(1000, 1000, 500, 90, ref array, l);
                 //DrawAngledLine(45, centerPoint+431, l, ref array);
 
