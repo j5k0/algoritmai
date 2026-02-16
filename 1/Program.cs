@@ -5,19 +5,49 @@ using System.Runtime.CompilerServices;
 
 namespace BMP_example
 {
-    // TODO: important note - change int everywhere to double and only round when drawing in order to minimise issues
     class Program
     {
-        static int resolution = 20000;
+        static int resolution = 2000;
         static int centerPoint = resolution/2;
 
         public static void ColorPixel(int x, int y, int l, int color, ref byte[] array)
         {
-            if(x+y != resolution*2){
+            if(x > 0 && y > 0 && x < resolution && y < resolution){
                 int byteIndex = x/8 + y*l;
                 int bitPosition = 7 - (x%8);
                 array[byteIndex] |= (byte)(color << bitPosition);
             }
+        }
+
+        public static void DrawParallelogram(double centerX, double centerY, double sideLength, double bottomLeftAngle, ref byte[] array, int l){
+            double rad = bottomLeftAngle * Math.PI / 180.0;
+            double offsetX = (sideLength * Math.Cos(rad))/2;
+            double offsetY = (sideLength - sideLength * Math.Sin(rad))/2;
+            double halfLength = sideLength/2;
+            double a = Math.Tan(rad);
+
+            int minX = (int)Math.Round(centerX - offsetX - halfLength);
+            int maxX = (int)Math.Round(centerX + offsetX + halfLength);
+
+            int minY = (int)Math.Round(centerY + offsetY - halfLength);
+            int maxY = (int)Math.Round(centerY - offsetY + halfLength);
+
+            int b1 = (int)Math.Round(minY - a*minX);
+            int b2 = (int)Math.Round(maxY - a*maxX);
+
+            //for(int i=0; i<resolution; i++){
+            //    ColorPixel(i, (int)(a*i + b1), l, 1, ref array);
+            //    ColorPixel(i, (int)(a*i + b2), l, 1, ref array);
+            //}
+
+            for(int y=minY; y<maxY; y++){
+                for(int x=minX; x<maxX; x++){
+                    if(y <= a*x + b1 && y >= a*x + b2)
+                        ColorPixel(x, y, l, 1, ref array);
+
+                }
+            }
+
         }
 
         public static void DrawRectangle(double x0, double y0, double w, double h, ref byte[] array, int l){
@@ -72,7 +102,8 @@ namespace BMP_example
                 DrawLine((prevX - previousHalfSquare*3), (prevY - previousHalfSquare*3 + currentGridSize*i), (prevX + previousHalfSquare*3), (prevY - previousHalfSquare*3 + currentGridSize*i), ref array, l);
             }
 
-            DrawRectangle((x - halfSquareSize), (y - halfSquareSize), (x + halfSquareSize), (y + halfSquareSize), ref array, l);
+            //DrawRectangle((x - halfSquareSize), (y - halfSquareSize), (x + halfSquareSize), (y + halfSquareSize), ref array, l);
+            DrawParallelogram(x, y, squareSize, 45, ref array, l);
 
             DrawRecursiveDepth(currentDepth + 1, maxDepth, (x+halfSquareSize/2*1), (y+halfSquareSize/2*-5), x, y, ref array, l);
             DrawRecursiveDepth(currentDepth + 1, maxDepth, (x+halfSquareSize/2*5), (y+halfSquareSize/2*-3), x, y, ref array, l);
@@ -125,6 +156,7 @@ namespace BMP_example
                 byte[] array = new byte[resolution * l];
 
                 DrawRecursiveDepth(0, 3, centerPoint, centerPoint, centerPoint, centerPoint, ref array, l);
+                //DrawParallelogram(1000, 1000, 500, 90, ref array, l);
 
                 file.Write(header);
                 file.Write(array);
