@@ -7,18 +7,18 @@ namespace BMP_example
 {
     class Program
     {
-        static int resolution = 8000;
-        static int gridSize = 2000;
+        static int resolution = 4000;
+        static int gridSize = 4000;
         static int angle = 90;
-        static int maxRecursiveDepth = 3;
+        static int maxRecursiveDepth = 4;
         static int centerPoint = resolution/2;
 
-        public static void ColorPixel(int x, int y, int l, int color, ref byte[] array)
+        public static void ColorPixel(int x, int y, int l, ref byte[] array)
         {
             if(x > 0 && y > 0 && x < resolution && y < resolution){
-                int byteIndex = x/8 + y*l;
+                long byteIndex = x/8 + y*l;
                 int bitPosition = 7 - (x%8);
-                array[byteIndex] |= (byte)(color << bitPosition);
+                array[byteIndex] |= (byte)(1 << bitPosition);
             }
         }
 
@@ -28,31 +28,22 @@ namespace BMP_example
             double offsetY = (sideLength - sideLength * Math.Sin(rad))/2;
             double halfLength = sideLength/2;
             double a = Math.Tan(rad);
-
-            int minX = (int)Math.Round(centerX - Math.Abs(offsetX) - halfLength);
-            int maxX = (int)Math.Round(centerX + Math.Abs(offsetX) + halfLength);
             
             int minY = (int)Math.Round(centerY + Math.Abs(offsetY) - halfLength);
             int maxY = (int)Math.Round(centerY - Math.Abs(offsetY) + halfLength);
-
-            double b1 = minY - a*(centerX - offsetX - halfLength);
-            double b2 = maxY - a*(centerX + offsetX + halfLength);
 
             int lims = finalLayer ? 1 : 3;
             int increase = finalLayer ? 2 : 1;
 
             for(int i=-lims; i<=lims; i+=increase){
-                DrawAngledLine(bottomLeftAngle, centerX + sideLength*i/2, centerY, sideLength*1.5, l, ref array);
+                DrawAngledLine(bottomLeftAngle, centerX + halfLength*i, centerY, sideLength*1.5, l, ref array);
                 DrawAngledLine(0, centerX + (offsetX)*i, centerY + (maxY-minY)*i/2, sideLength*1.5, l, ref array);
             }
 
-            double left = b1 > b2 ? b2 : b1;
-            double right = b1 > b2 ? b1 : b2;
-
             for(int y=minY; y<maxY; y++){
-                for(int x=minX; x<maxX; x++){
-                    if(y <= a*x + right && y >= a*x + left)
-                        ColorPixel(x, y, l, 1, ref array);
+                double start = (centerX - halfLength) + (y-centerY)/a;
+                for(int x=(int)start; x < start+sideLength; x++){
+                    ColorPixel(x, y, l, ref array);
                 }
             }
         }
@@ -65,7 +56,7 @@ namespace BMP_example
             for(int i=-lim; i<lim; i++){
                 int x = (int)(cx + i*dx);
                 int y = (int)(cy + i*dy);
-                ColorPixel(x, y, l, 1, ref array);
+                ColorPixel(x, y, l, ref array);
             }
         }
 
