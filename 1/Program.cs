@@ -11,6 +11,7 @@ namespace BMP_example
         static int gridSize = 4000;
         static int angle = 90;
         static int maxRecursiveDepth = 4;
+        static int minDetail = 6;
         static int centerPoint = resolution/2;
 
         public static void ColorPixel(int x, int y, int l, ref byte[] array)
@@ -60,7 +61,7 @@ namespace BMP_example
             }
         }
 
-        public static void DrawRecursiveDepth(int currentDepth, int maxDepth, int angle, double x, double y, double prevX, double prevY, ref byte[] array, int l){
+        public static void DrawRecursiveDepth(int currentDepth, int maxDepth, int angle, double x, double y, ref byte[] array, int l){
             if(currentDepth >= maxDepth)
                 return;
 
@@ -77,11 +78,11 @@ namespace BMP_example
             double my = Math.Sin(rad);
             double mx = Math.Cos(rad);
 
-            DrawRecursiveDepth(currentDepth + 1, maxDepth, angle, x+halfSquareSize*0.5 - offsetX*2.5,  y+halfSquareSize*-2.5*my, x, y, ref array, l);
-            DrawRecursiveDepth(currentDepth + 1, maxDepth, angle, x+halfSquareSize*2.5 - offsetX*1.5,  y+halfSquareSize*-1.5*my, x, y, ref array, l);
-            DrawRecursiveDepth(currentDepth + 1, maxDepth, angle, x+halfSquareSize*1.5 - offsetX*0.5,  y+halfSquareSize*-0.5*my, x, y, ref array, l);
-            DrawRecursiveDepth(currentDepth + 1, maxDepth, angle, x+halfSquareSize*-2.5 + offsetX*0.5, y+halfSquareSize*0.5*my,  x, y, ref array, l);
-            DrawRecursiveDepth(currentDepth + 1, maxDepth, angle, x+halfSquareSize*1.5 + offsetX*2.5,  y+halfSquareSize*2.5*my,  x, y, ref array, l);
+            DrawRecursiveDepth(currentDepth + 1, maxDepth, angle, x+halfSquareSize*0.5 - offsetX*2.5,  y+halfSquareSize*-2.5*my, ref array, l);
+            DrawRecursiveDepth(currentDepth + 1, maxDepth, angle, x+halfSquareSize*2.5 - offsetX*1.5,  y+halfSquareSize*-1.5*my, ref array, l);
+            DrawRecursiveDepth(currentDepth + 1, maxDepth, angle, x+halfSquareSize*1.5 - offsetX*0.5,  y+halfSquareSize*-0.5*my, ref array, l);
+            DrawRecursiveDepth(currentDepth + 1, maxDepth, angle, x+halfSquareSize*-2.5 + offsetX*0.5, y+halfSquareSize*0.5*my, ref array, l);
+            DrawRecursiveDepth(currentDepth + 1, maxDepth, angle, x+halfSquareSize*1.5 + offsetX*2.5,  y+halfSquareSize*2.5*my, ref array, l);
         }
 
         static void Main(string[] args)
