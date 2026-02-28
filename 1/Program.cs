@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace BMP_example
 {
@@ -10,7 +11,6 @@ namespace BMP_example
         static int resolution = 4000;
         static int gridSize = 3000;
         static int angle = 90;
-        static int maxRecursiveDepth = 1;
         static int minDetail = 1;
         static int centerPoint = resolution/2;
 
@@ -109,6 +109,21 @@ namespace BMP_example
             DrawRecursiveSize(angle, nextSize, x+halfSquareSize*1.5 + offsetX*2.5,  y+halfSquareSize*2.5*my,  ref array, l);
         }
 
+        public static void SetImageSize(ref byte[] header, int resolution, ref byte[] array, ref int l){
+                byte[] resBytes = BitConverter.GetBytes(resolution);
+                l = (resolution + 31) / 32 * 4;
+                array = new byte[resolution*l];
+                header[18] = resBytes[0];
+                header[19] = resBytes[1];
+                header[20] = resBytes[2];
+                header[21] = resBytes[3];
+                header[22] = resBytes[0];
+                header[23] = resBytes[1];
+                header[24] = resBytes[2];
+                header[25] = resBytes[3];
+
+        }
+
         static void Main(string[] args)
         {
             var header = new byte[62]
@@ -137,23 +152,31 @@ namespace BMP_example
 
             using (FileStream file = new FileStream("sample.bmp", FileMode.Create, FileAccess.Write))
             {
-                byte[] resBytes = BitConverter.GetBytes(resolution);
+                byte[] array = {};
+                int l = 0;
+                SetImageSize(ref header, resolution, ref array, ref l);
 
-                header[18] = resBytes[0];
-                header[19] = resBytes[1];
-                header[20] = resBytes[2];
-                header[21] = resBytes[3];
-                header[22] = resBytes[0];
-                header[23] = resBytes[1];
-                header[24] = resBytes[2];
-                header[25] = resBytes[3];
+                Stopwatch stopwatch = new Stopwatch();
+                int[] depthArray = { 1, 1, 2, 4, 8, 12 };
+                int[] resolutionArray = { 1024, 1024, 2048, 4096, 8192, 16384 };
 
+                /*for(int i=0; i<depthArray.Length; i++){
+                    stopwatch.Reset();
+                    stopwatch.Start();
+                    DrawRecursiveDepth(0, depthArray[i], angle, gridSize/3, centerPoint, centerPoint, ref array, l);
+                    stopwatch.Stop();
+                    Console.WriteLine($"Rekursinio gylio {depthArray[i]} vykdymo trukmė: {stopwatch.ElapsedMilliseconds} ms.");
+                }*/
 
-                int l = (resolution + 31) / 32 * 4;
-                byte[] array = new byte[resolution * l];
-
-                //DrawRecursiveDepth(0, maxRecursiveDepth, angle, gridSize/3, centerPoint, centerPoint, ref array, l);
-                DrawRecursiveSize(angle, gridSize/3, centerPoint, centerPoint, ref array, l);
+                for(int i=0; i<resolutionArray.Length; i++){
+                    resolution = resolutionArray[i];
+                    SetImageSize(ref header, resolution, ref array, ref l);
+                    stopwatch.Reset();
+                    stopwatch.Start();
+                    DrawRecursiveSize(angle, resolution/3, resolution/2, resolution/2, ref array, l);
+                    stopwatch.Stop();
+                    Console.WriteLine($"{resolution} matmenų paveikslėlio piešimo trukmė: {stopwatch.ElapsedMilliseconds} ms.");
+                }
 
                 file.Write(header);
                 file.Write(array);
