@@ -77,15 +77,10 @@
                 return default;
             }
 
-            public T? Last()
+            public  void Last()
             {
                 if(current != null)
-                {
-                    T tmp = current.data;
                     current = current.previous;
-                    return tmp;
-                }
-                return default;
             }
 
             public bool Exists()
@@ -93,65 +88,20 @@
                 return current != null;
             }
 
-            public void SetHead()
+            public void Reset()
             {
                 current = head;
-            }
-
-            public void SetTail()
-            {
-                current = tail;
             }
         }
 
         const int divisionConstant = 3;
 
-        static int getMagicSumRecursive(DoublyLinkedList<int> c, int a, int b)
-        {
-            if(a <= 0 && b <= 0)
-                return 0;
+        static int getSomeNumber(DoublyLinkedList<int> c, int a, int b){
 
-            int sum = 0;
-
-            c.SetHead();
-            for(int i=0; i<a; i++)
-            {
-                sum += c.Next();
-            }
-
-            c.SetTail();
-            for(int i=0; i<b; i++)
-            {
-                sum += c.Last();
-            }
-
-            return sum + getMagicSumRecursive(c, a/divisionConstant, b/divisionConstant);
+            return 50;
         }
 
-        static int getMagicSumIterative(DoublyLinkedList<int> c, int a, int b)
-        {
-            int sum = 0;
-            while(!(a <= 0 && b <= 0))
-            {
-                c.SetHead();
-                for(int i=0; i<a; i++)
-                {
-                    sum += c.Next();
-                }
-
-                c.SetTail();
-                for(int i=0; i<b; i++)
-                {
-                    sum += c.Last();
-                }
-                a /= divisionConstant;
-                b /= divisionConstant;
-            }
-            return sum;
-        }
-
-        static void Main(string[] args)
-        {
+        static void Main(string[] args){
             DoublyLinkedList<int> n = new DoublyLinkedList<int>();
             n.Add(5);
             n.Add(10);
@@ -160,10 +110,32 @@
             n.Add(17);
             n.Add(2);
 
+            while(n.Exists()){
+                Console.Write(" " + n.Next());
+            }
+            Console.WriteLine();
 
-            Console.WriteLine(getMagicSumRecursive(n, 5, 0));
-            Console.WriteLine(getMagicSumIterative(n, 5, 0));
+            n.Remove(2);
+            n.Reset();
+            while(n.Exists()){
+                Console.Write(" " + n.Next());
+            }
+            Console.WriteLine();
 
+
+            n.Remove(5);
+            n.Reset();
+            while(n.Exists()){
+                Console.Write(" " + n.Next());
+            }
+            Console.WriteLine();
+
+            n.Remove(15);
+            n.Reset();
+            while(n.Exists()){
+                Console.Write(" " + n.Next());
+            }
+            Console.WriteLine();
         }
     }
 }
