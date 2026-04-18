@@ -1,0 +1,7 @@
+﻿namespace IP 
+{
+    class Program
+    {
+
+    }
+}
