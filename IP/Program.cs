@@ -2,7 +2,7 @@
 
 namespace IP 
 {
-    class Place
+    public class Place
     {
         public int Num { get; set; }
         public string Name { get; set; }
@@ -47,9 +47,14 @@ namespace IP
         {
             string filePath = "punktai.csv";
             List<Place> places = ReadFile(filePath);
-            foreach(Place place in places)
+            List<Place>[] busRoutes = GreedyAlgorithm.Solve(places, 4, 67-1);
+            foreach(var busRoute in busRoutes)
             {
-                Console.WriteLine($"Num: {place.Num}, Name: {place.Name}, X: {place.X}, Y: {place.Y}");
+                foreach(var place in busRoute)
+                {
+                    Console.Write($"{place.X};{place.Y};\n");
+                }
+                Console.WriteLine();
             }
         }
     }
